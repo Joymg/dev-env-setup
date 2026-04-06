@@ -204,7 +204,6 @@ install_nerdfont() {
     os=$(detect_os)
     local font_name="JetBrainsMono"
     local version="2.304"
-    local font_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${fontName}.zip"
     local tmpfile
     tmpfile=$(mktemp)
 
