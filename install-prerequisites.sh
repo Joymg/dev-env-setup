@@ -203,7 +203,7 @@ install_nerdfont() {
     local os
     os=$(detect_os)
     local font_name="JetBrainsMono"
-    local version="2.304"
+    local version="3.4.0"
     local tmpfile
     tmpfile=$(mktemp)
 
