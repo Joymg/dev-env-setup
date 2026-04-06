@@ -50,6 +50,7 @@ Installs all required software on the host machine.
 - Detects OS (Linux, WSL, macOS)
 - Installs Docker Engine or guides for Docker Desktop
 - Installs DevPod CLI
+- Installs NerdFont (JetBrains Mono)
 - Configures SSH keys for GitHub
 - Verifies installation
 
@@ -136,3 +137,37 @@ ssh-add ~/.ssh/id_ed25519
 # Test GitHub connection
 ssh -T git@github.com
 ```
+
+### Terminal doesn't show NerdFont symbols
+
+After installing the NerdFont, you need to configure your terminal to use it:
+
+**Windows Terminal:**
+1. Open Settings → Profiles → Defaults (or your profile)
+2. Click "Additional settings" → "Appearance"
+3. Set "Font face" to "JetBrainsMono Nerd Font" (or "JetBrainsMono")
+4. Click Save
+
+**VS Code:**
+1. Open Settings (Ctrl+,)
+2. Search for "terminal font" or "Terminal › Integrated: Font Family"
+3. Set font family to "JetBrainsMono Nerd Font"
+4. Restart terminal
+
+**Alacritty:**
+1. Open `~/.config/alacritty/alacritty.toml` or `~/.alacritty.yml`
+2. Set font:
+```toml
+[font]
+normal = { family = "JetBrainsMono Nerd Font" }
+```
+3. Restart Alacritty
+
+** GNOME Terminal:**
+1. Open Terminal → Preferences → Profiles
+2. Select your profile → Click Edit
+3. Go to "Text" tab → Click "Change" next to Font
+4. Select "JetBrainsMono Nerd Font"
+5. Click Select and close
+
+**Note:** You may need to restart your terminal or log out/in for the font to appear in the list.
