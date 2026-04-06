@@ -31,6 +31,11 @@ install_docker_linux() {
         return 0
     fi
 
+    if ! command -v unzip &> /dev/null; then
+        log_info "Installing unzip (required for fonts)..."
+        sudo apt-get update && sudo apt-get install -y unzip
+    fi
+
     log_info "Installing Docker Engine via convenience script..."
     curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
     sudo sh /tmp/get-docker.sh
@@ -48,6 +53,11 @@ install_docker_wsl() {
     if command -v docker &> /dev/null; then
         log_warn "Docker already installed: $(docker --version)"
         return 0
+    fi
+
+    if ! command -v unzip &> /dev/null; then
+        log_info "Installing unzip..."
+        sudo apt-get update && sudo apt-get install -y unzip
     fi
 
     log_warn "Docker Desktop for Windows is required."
@@ -165,6 +175,65 @@ configure_ssh_keys() {
     fi
 }
 
+check_nerdfont_installed() {
+    local font_dir="$HOME/.local/share/fonts"
+    local fonts=("JetBrains Mono" "FiraCode" "Hack" "Cascadia Code")
+
+    if [[ ! -d "$font_dir" ]]; then
+        return 1
+    fi
+
+    for font in "${fonts[@]}"; do
+        if ls "$font_dir" 2>/dev/null | grep -qi "$font"; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+install_nerdfont() {
+    log_info "Installing NerdFont..."
+
+    if check_nerdfont_installed; then
+        log_warn "NerdFont already installed."
+        return 0
+    fi
+
+    local os
+    os=$(detect_os)
+    local font_name="JetBrainsMono"
+    local version="2.304"
+    local font_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${fontName}.zip"
+    local tmpfile
+    tmpfile=$(mktemp)
+
+    log_info "Downloading ${font_name} NerdFont..."
+
+    case "$os" in
+        wsl|linux|macos)
+            curl -fsSL "https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${font_name}.zip" -o "$tmpfile"
+            ;;
+    esac
+
+    if [[ ! -f "$tmpfile" ]]; then
+        log_error "Failed to download font"
+        return 1
+    fi
+
+    local font_dir="$HOME/.local/share/fonts/nerd-fonts"
+    mkdir -p "$font_dir"
+
+    unzip -o "$tmpfile" -d "$font_dir"
+    rm "$tmpfile"
+
+    fc-cache -f -v > /dev/null 2>&1 || true
+
+    log_info "${font_name} NerdFont installed to $font_dir"
+    log_warn "You may need to restart your terminal or log out/in for the font to appear."
+    log_info "Configure your terminal to use: ${font_name} Nerd Font"
+}
+
 verify_installation() {
     log_info "Verifying installation..."
 
@@ -189,6 +258,16 @@ verify_installation() {
         missing=1
     else
         log_info "Git: $(git --version)"
+    fi
+
+    if ! command -v unzip &> /dev/null; then
+        log_warn "unzip not found - font installation may fail"
+    fi
+
+    if check_nerdfont_installed; then
+        log_info "NerdFont: installed"
+    else
+        log_warn "NerdFont: not installed"
     fi
 
     if [[ $missing -eq 1 ]]; then
@@ -231,6 +310,13 @@ main() {
 
     echo
     install_devpod
+
+    echo
+    read -p "Do you want to install a NerdFont? (Y/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+        install_nerdfont
+    fi
 
     echo
     read -p "Do you want to configure SSH keys for GitHub? (Y/n): " -n 1 -r
