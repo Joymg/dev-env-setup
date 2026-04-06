@@ -282,6 +282,11 @@ main() {
     local os
     os=$(detect_os)
 
+    if ! command -v unzip &> /dev/null; then
+        log_info "Installing unzip (required for fonts)..."
+        sudo apt-get update && sudo apt-get install -y unzip
+    fi
+
     log_info "Detected OS: $os"
     echo
 
