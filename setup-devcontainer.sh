@@ -16,6 +16,14 @@ log_step() { echo -e "${BLUE}[STEP]${NC} $*"; }
 DEFAULT_REPO_URL="git@github.com:Joymg/dev-env-template.git"
 DEFAULT_DEV_DIR="$HOME/dev"
 
+install_jq() {
+    if command -v jq &> /dev/null; then
+        return 0
+    fi
+    log_info "Installing jq..."
+    sudo apt-get update && sudo apt-get install -y jq
+}
+
 usage() {
     cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
@@ -222,6 +230,7 @@ build_container() {
 }
 
 main() {
+    install_jq
     parse_args "$@"
     detect_github_user
     confirm_setup
