@@ -180,15 +180,9 @@ configure_devcontainer() {
     local tmp_file
     tmp_file=$(mktemp)
 
-    # Update name
-    jq --arg name "$CONTAINER_NAME" '.name = $name' "$devcontainer_json" > "$tmp_file"
-    mv "$tmp_file" "$devcontainer_json"
-
-    # Update workspaceFolder paths (replace REPO_NAME placeholder)
-    tmp_file=$(mktemp)
-    jq --arg repo "$CONTAINER_NAME" \
-       '.workspaceFolder = "/workspaces/\($repo)" | .onCreateCommand = "/workspaces/\($repo)/.devcontainer/init.sh" | .postCreateCommand = "/workspaces/\($repo)/.devcontainer/setup.sh"' \
-       "$devcontainer_json" > "$tmp_file"
+    # Update name and workspaceFolder only (paths are relative now)
+    jq --arg name "$CONTAINER_NAME" --arg ws "/workspaces/$CONTAINER_NAME" \
+       '.name = $name | .workspaceFolder = $ws' "$devcontainer_json" > "$tmp_file"
     mv "$tmp_file" "$devcontainer_json"
 
     if [[ -n "$GITHUB_USER" ]]; then
